@@ -1,10 +1,24 @@
+const produtos = require("../models/produtos");
 const Produto = require("../models/produtos");
 
 module.exports = {
   async index(req, res) {
-    const user = await Produto.find();
-
-    res.json(user);
+    let query = {};
+    if (req.query.nome_produto) {
+      let nome_produto = new RegExp(req.query.nome_produto, "i");
+      query.$or = [
+        {
+          nome_produto: nome_produto,
+        },
+      ];
+    }
+    Produto.find(query, null, { limit: 10 }, (err, produtos) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send("Error");
+      }
+      return res.status(200).json(produtos);
+    });
   },
   async create(req, res) {
     const {
